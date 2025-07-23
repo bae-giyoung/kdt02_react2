@@ -7,6 +7,11 @@ import { isLogin } from '../atoms/IsLoginAtom'
 export default function Nav() {
     const [login, setLogin] = useAtom(isLogin);
 
+    const handleLogout = () => {
+        localStorage.removeItem("id");
+        setLogin(false);
+    }
+
     return (
         <header className='w-full min-h-20 flex justify-between items-center
                             bg-amber-50 px-10'>
@@ -25,7 +30,7 @@ export default function Nav() {
             
             <div className="mr-10 text-xl font-bold p-2 border border-green-700 text-green rounded-xl">
                 <Link to='/login' className='block w-full w-hull cursor-pointer hover:bg-green-800 rounded-xl hover:text-white'>
-                    {login ? <span onClick={() => setLogin(false)}>로그아웃</span> : '로그인'}
+                    {login ? <span onClick={handleLogout}>로그아웃</span> : '로그인'}
                 </Link>
             </div>
         </header>
