@@ -4,6 +4,7 @@ import Home from './components/Home'
 import Nav from './components/Nav'
 import Login from './components/Login'
 import Subway from './components/Subway'
+import SubwayChart from './components/SubwayChart'
 
 function App() {
   return (
@@ -16,7 +17,7 @@ function App() {
           <Routes>
             <Route path='/' element={<Home />} />
             <Route path='/login' element={<Login />} />
-            <Route path='/subway' element={<Subway />} />
+            <Route path='/subway' element={<SubwayChart />} />
           </Routes>
         </main>
         <footer className='w-full min-h-20 flex justify-center items-center
