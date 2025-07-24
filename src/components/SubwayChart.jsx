@@ -28,7 +28,7 @@ ChartJS.register(
 export default function SubwayChart() {
     const [tdata, setTdata] = useState([]);
     const [resultTable, setResultTable] = useState([]);
-    const [chart, setChart] = useState();
+    const [chart, setChart] = useState([]);
     const isInit = useRef(true);
     //const hasData = useRef(false);
     const selRef = useRef();
@@ -91,11 +91,11 @@ export default function SubwayChart() {
     const drawCharts = () => {
         const chartColors = ["red", "orange", "yellow", "green", "blue", "black", "violet", "gray", "brown"];
         const labels = [...tdata].map(item => item["controlnumber"].slice(-2) + "시");
-        //const cate1 = tableKeys.current.filter(item => item != "co2");
-        //const cate2 = tableKeys.current.filter(item => item == "co2");
+        const cate1 = tableKeys.current.filter(item => (!item.includes("no") && item !=  "co"));
+        const cate2 = tableKeys.current.filter(item => (item.includes("no") || item == "co")); // 0.0대에서 왔다갔다 하는 애들은 따로 빼서 차트 하나 더 그리자-> 그런데 밑으로 말고 옆으로 그리고 싶은데...
 
 
-        const chData = {
+        /* const chData = {
             labels,
             datasets: tableKeys.current.map((cate, idx) => {
                 return {
@@ -103,79 +103,86 @@ export default function SubwayChart() {
                     data: tdata.map(data => data[cate] == "-" ? null : parseFloat(data[cate])),
                     //spanGaps: true,
                     borderColor: chartColors[idx],
-                    backgroundColor: chartColors[idx],
+                    backgroundColor: 'transparent',
+                    borderDash: idx % 3 == 0 ? [6,2,1,2] : idx % 3 == 1 ? [] : [5,2,2,2],
+                    yAxisID: cate != "co2" ? 'y' : 'y1',
+                }
+            }),
+        }; */
+
+        const chData1 = {
+            labels,
+            datasets: cate1.map((cate, idx) => {
+                return {
+                    label: cate,
+                    data: tdata.map(data => data[cate] == "-" ? null : parseFloat(data[cate])),
+                    borderColor: chartColors[idx],
+                    backgroundColor: 'transparent',
                     borderDash: idx % 3 == 0 ? [6,2,1,2] : idx % 3 == 1 ? [] : [5,2,2,2],
                     yAxisID: cate != "co2" ? 'y' : 'y1',
                 }
             }),
         };
 
-        /* const chData1 = {
-            labels,
-            datasets: cate1.map((cate, idx) => {
-                return {
-                    label: cate,
-                    data: tdata.map(data => data[cate]),
-                    borderColor: chartColors[idx],
-                    backgroundColor: chartColors[idx],
-                    yAxisID: idx % 2 != 0 ? 'y' : 'y1',
-                }
-            }),
-        };
-
         const chData2 = {
             labels,
-            datasets: cate2.map(cate => {
+            datasets: cate2.map((cate, idx) => {
                 return {
                     label: cate,
-                    data: tdata.map(data => data[cate]),
-                    borderColor: 'red',
-                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                    yAxisID: 'y',
+                    data: tdata.map(data => data[cate] == "-" ? null : parseFloat(data[cate])),
+                    borderColor: chartColors[idx],
+                    backgroundColor: 'transparent',
+                    borderDash: idx % 3 == 0 ? [6,2,1,2] : idx % 3 == 1 ? [] : [5,2,2,2],
+                    yAxisID: cate != "co" ? 'y' : 'y1',
                 }
             }),
-        }; */
-
-        const chOptions = {
-            responsive: true,
-            interaction: {
-                mode: 'index',
-                intersect: false,
-            },
-            stacked: false,
-            plugins: {
-                title: {
-                    display: true,
-                    text: '지하철 실내 공기질 정보',
-                    font: {
-                        size: 20,
-                        weight: 'bold',
-                    }
-                },
-                legend: {
-                    position: 'bottom',
-                }
-            },
-            scales: {
-                y: {
-                    type: 'linear',
-                    display: true,
-                    position: 'left',
-                },
-                y1: {
-                    type: 'linear',
-                    display: true,
-                    position: 'right',
-                    grid: {
-                    drawOnChartArea: false,
-                    },
-                },
-            },
         };
 
+        const [chOptions1, chOptions2] = [0,1].map(item => {
+            return (
+                {
+                    responsive: true,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    stacked: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: item == 0 ? '지하철 실내 공기질 정보1' : '지하철 실내 공기질 정보2',
+                            font: {
+                                size: 20,
+                                weight: 'bold',
+                            }
+                        },
+                        legend: {
+                            position: 'bottom',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            grid: {
+                            drawOnChartArea: false,
+                            },
+                        },
+                    },
+                }
+        )});
+        //const chOptions2 = Object.assign({}, chOptions1);
+        //chOptions2.plugins.title.text = "지하철 실내 공기질 정보2 (질소 화합물)";
+
         //console.log(chData1);
-        setChart(<Line key={"chData1"} options={chOptions} data={chData} />);
-        //setChart([<Line key={"chData1"} options={chOptions} data={chData1} />, <Line key={"chData2"} options={chOptions} data={chData2} />]);
+        //setChart(<Line key={"chData1"} options={chOptions} data={chData} />);
+        setChart([<Line key={"chData1"} options={chOptions1} data={chData1} />, <Line key={"chData2"} options={chOptions2} data={chData2} />]);
     }
 
     // tdata 변경 되면
@@ -203,7 +210,6 @@ export default function SubwayChart() {
                 </div>
             );
 
-            //console.log(chData); ////////
             //hasData.current = true;
             drawCharts();
         }
@@ -221,8 +227,11 @@ export default function SubwayChart() {
                             caption="--- 측정소를 선택하세요 ---" />
             </div>
             <div className="flex flex-col gap-5 mt-8">
-                {chart}
-                {resultTable}
+                <div className="flex gap-2 max-w-full box-border">
+                    <div className="w-1/2">{chart.length && chart[0]}</div>
+                    <div className="w-1/2">{chart.length == 2 && chart[1]}</div>
+                </div>
+                <div>{resultTable}</div>
             </div>
         </>
     )
