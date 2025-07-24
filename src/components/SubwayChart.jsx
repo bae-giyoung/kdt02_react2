@@ -30,9 +30,10 @@ export default function SubwayChart() {
     const [resultTable, setResultTable] = useState([]);
     const [chart, setChart] = useState([]);
     const isInit = useRef(true);
-    //const hasData = useRef(false);
     const selRef = useRef();
     const tableKeys = useRef(Object.keys(scode));
+
+    // 오늘 날짜
     const date = new Date();
     const today = date.getFullYear() + ("00" + (date.getMonth() + 1)).slice(-2) + ("00" + date.getDate()).slice(-2);
 
@@ -41,7 +42,8 @@ export default function SubwayChart() {
         const apikey = import.meta.env.VITE_DATA_API;
         const areaCode = selRef.current.value;
         const baseUrl = "https://apis.data.go.kr/6260000/IndoorAirQuality/getIndoorAirQualityByStation?";
-        const url = `${baseUrl}serviceKey=${apikey}&pageNo=1&numOfRows=12&resultType=json&controlnumber=${today}&areaIndex=${areaCode}`;
+        const url = `${baseUrl}serviceKey=${apikey}&pageNo=1&numOfRows=12&resultType=json&controlnumber=20250724&areaIndex=${areaCode}`;
+        //const url = `${baseUrl}serviceKey=${apikey}&pageNo=1&numOfRows=12&resultType=json&controlnumber=${today}&areaIndex=${areaCode}`;
         //console.log(url, today);
 
         const resp = await fetch(url);
@@ -54,12 +56,12 @@ export default function SubwayChart() {
         
             if(data.response.header.resultCode == "00") {  
                 if(data.response.body["numOfRows"] == "0") {
-                resultData = ["no-data"];
+                    resultData = ["no-data"];
                 } else {
-                resultData = (data.response.body.items.item).sort((a, b) => a["controlnumber"] - b["controlnumber"]);
+                    resultData = (data.response.body.items.item).sort((a, b) => a["controlnumber"] - b["controlnumber"]);
                 }
             } else {
-                resultData = ["extra-error"];
+                    resultData = ["extra-error"];
             }
 
         } else {
@@ -73,28 +75,15 @@ export default function SubwayChart() {
         setTdata(resultData);
     }
 
-  const makeTableUnits = (obj) => {
-    const tableUnits = tableKeys.current.map((item, idx) => {
-        return (<div key={idx} className="mt-2 text-center border border-black">
-            <p className="bg-green-800 text-white font-extrabold px-1 box-border">
-                {scode[item]["name"]}<br />{item}
-            </p>
-            <p className="px-1 box-border">
-                {obj[item]}
-            </p>
-        </div>)
-    });
-    return tableUnits;
-  }
-
+    
     // 차트 그리기
     const drawCharts = () => {
         const chartColors = ["red", "orange", "yellow", "green", "blue", "black", "violet", "gray", "brown"];
         const labels = [...tdata].map(item => item["controlnumber"].slice(-2) + "시");
         const cate1 = tableKeys.current.filter(item => (!item.includes("no") && item !=  "co"));
-        const cate2 = tableKeys.current.filter(item => (item.includes("no") || item == "co")); // 0.0대에서 왔다갔다 하는 애들은 따로 빼서 차트 하나 더 그리자-> 그런데 밑으로 말고 옆으로 그리고 싶은데...
+        const cate2 = tableKeys.current.filter(item => (item.includes("no") || item == "co")); // 0.0대에서 왔다갔다 하는 애들은 따로 빼서 차트 하나 더 그리자!
 
-
+        
         /* const chData = {
             labels,
             datasets: tableKeys.current.map((cate, idx) => {
@@ -106,10 +95,10 @@ export default function SubwayChart() {
                     backgroundColor: 'transparent',
                     borderDash: idx % 3 == 0 ? [6,2,1,2] : idx % 3 == 1 ? [] : [5,2,2,2],
                     yAxisID: cate != "co2" ? 'y' : 'y1',
-                }
-            }),
-        }; */
-
+                    }
+                    }),
+                    }; */
+                    
         const chData1 = {
             labels,
             datasets: cate1.map((cate, idx) => {
@@ -123,7 +112,7 @@ export default function SubwayChart() {
                 }
             }),
         };
-
+        
         const chData2 = {
             labels,
             datasets: cate2.map((cate, idx) => {
@@ -137,7 +126,7 @@ export default function SubwayChart() {
                 }
             }),
         };
-
+        
         const [chOptions1, chOptions2] = [0,1].map(item => {
             return (
                 {
@@ -150,11 +139,14 @@ export default function SubwayChart() {
                     plugins: {
                         title: {
                             display: true,
-                            text: item == 0 ? '지하철 실내 공기질 정보1' : '지하철 실내 공기질 정보2',
+                            //text: item == 0 ? '지하철 실내 공기질 정보1' : '지하철 실내 공기질 정보2',
+                            text: '지하철 실내 공기질 정보',
                             font: {
                                 size: 20,
                                 weight: 'bold',
-                            }
+                                color: 'black',
+                            },
+                            position: 'bottom',
                         },
                         legend: {
                             position: 'bottom',
@@ -172,45 +164,68 @@ export default function SubwayChart() {
                             position: 'right',
                             grid: {
                             drawOnChartArea: false,
-                            },
+                        },
                         },
                     },
                 }
         )});
         //const chOptions2 = Object.assign({}, chOptions1);
         //chOptions2.plugins.title.text = "지하철 실내 공기질 정보2 (질소 화합물)";
-
-        //console.log(chData1);
-        //setChart(<Line key={"chData1"} options={chOptions} data={chData} />);
-        setChart([<Line key={"chData1"} options={chOptions1} data={chData1} />, <Line key={"chData2"} options={chOptions2} data={chData2} />]);
+        
+        //console.log(chData);
+        //setChart(<Line key={"chData"} options={chOptions} data={chData} />);
+        setChart(
+            [
+                chData1.datasets.map((item => item.data.reduce((prev, curr) => prev + curr))).reduce((prev, curr) => prev +curr) != 0 &&
+                <div className="w-full flex-1/2 shrink-0 flex justify-center"><Line key={"chData1"} options={chOptions1} data={chData1} className="w-full max-w-full" /></div>, 
+                
+                chData2.datasets.map((item => item.data.reduce((prev, curr) => prev + curr))).reduce((prev, curr) => prev +curr) != 0 &&
+                <div className="w-full flex-1/2 shrink-0 flex justify-center"><Line key={"chData2"} options={chOptions2} data={chData2} className="w-full max-w-full" /></div>
+            ]
+        );
+    }
+    
+    const makeTableUnits = (obj) => {
+      const tableUnits = tableKeys.current.map((item, idx) => {
+          return (
+          <div key={idx} className="mt-2 text-center border border-black">
+              <p className="bg-green-800 text-white font-extrabold px-1 box-border">
+                  {scode[item]["name"]}<br />{item}
+              </p>
+              <p className="px-1 box-border">
+                  {obj[item]}
+              </p>
+          </div>
+          )
+      });
+      return tableUnits;
     }
 
     // tdata 변경 되면
     useEffect(() => {
         if(isInit.current) return;
-
+        
         // 표 그리기
         let eachTable = null;
         
         if(!isInit.current && tdata.length == 1 && tdata[0].includes("no-data")) {
             eachTable = <div>해당하는 데이터가 존재하지 않습니다.</div>
-            //hasData.current = false;
 
         } else if(!isInit.current && tdata.length == 1 && tdata[0].includes("extra-error")) {
             eachTable = <div>예상치 못한 에러가 발생했습니다.</div>
-            //hasData.current = false;
 
         } else {
             eachTable = tdata.map((obj, idx) =>
-                <div key={obj["controlnumber"] + idx} className="mt-5">
-                <p className="font-extrabold text-right">({date.toLocaleDateString() + " " + obj["controlnumber"].slice(-2)}:00)</p>
-                <div className="flex">
-                    {makeTableUnits(obj)}
-                </div>
+                <div key={obj["controlnumber"] + idx} className="flex flex-col mt-5">
+                    <p className="font-extrabold text-right">
+                        ({date.toLocaleDateString() + " " + obj["controlnumber"].slice(-2)}:00)
+                    </p>
+                    <div className="grid grid-cols-9">
+                        {makeTableUnits(obj)}
+                    </div>
                 </div>
             );
 
-            //hasData.current = true;
             drawCharts();
         }
 
@@ -226,15 +241,13 @@ export default function SubwayChart() {
                             onHandle={handleSelect} 
                             caption="--- 측정소를 선택하세요 ---" />
             </div>
-            <div className="flex flex-col gap-5 mt-8">
-                <div className="flex gap-2 max-w-full box-border">
-                    <div className="w-1/2">{chart.length && chart[0]}</div>
-                    <div className="w-1/2">{chart.length == 2 && chart[1]}</div>
+            <div className="w-full flex flex-col gap-5 mt-12">
+                <div className="flex flex-col gap-6 max-w-full box-border 
+                                lg:flex-row items-center justify-center">
+                    {chart}
                 </div>
-                <div>{resultTable}</div>
+                {resultTable}
             </div>
         </>
     )
 }
-
-//{hasData.current && <Line options={chOptions} data={chData} />}
