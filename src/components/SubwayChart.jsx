@@ -37,6 +37,7 @@ export default function SubwayChart() {
     // 오늘 날짜
     const date = new Date();
     const today = date.toISOString().slice(0, 10).replaceAll("-", "");
+    // 문자열 포맷팅 연습 : "20250725".replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3")
 
     // 셀렉트 값 변경되면 데이터 요청하기
     const handleSelect = async () => {
@@ -55,9 +56,9 @@ export default function SubwayChart() {
         const contentType = resp.headers.get("content-type");
         let resultData = [];
         
-        if (contentType.includes('application/json')) {  // 자정이 넘어서 해당 일자의 실시간 측정 data가 존재하지 않아서 xml을 응답하는 경우가 있었음
-        const data = await resp.json();
-        //console.log(data.response);
+        if (contentType.includes('application/json')) { // 자정이 넘어서 해당 일자의 실시간 측정 data가 존재하지 않아서 xml을 응답하는 경우가 있었음
+            const data = await resp.json();
+            //console.log(data.response);
         
             if(data.response.header.resultCode == "00") {  
                 if(data.response.body["numOfRows"] == "0") {
@@ -149,18 +150,18 @@ export default function SubwayChart() {
                         }
                     },
                     scales: {
-                        y: {
-                            type: 'linear',
-                            display: true,
-                            position: 'left',
-                        },
-                        y1: {
-                            type: 'linear',
-                            display: true,
-                            position: 'right',
-                            grid: {
-                            drawOnChartArea: false,
-                        },
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                grid: {
+                                drawOnChartArea: false,
+                            },
                         },
                     },
                 }
@@ -238,7 +239,7 @@ export default function SubwayChart() {
         setResultTable(eachTable);
 
         /* return (()=> {
-            // 차트 여기서 무너뜨려야 할 것 같은데...?
+            //
         }) */
     }, [tdata]);
 
