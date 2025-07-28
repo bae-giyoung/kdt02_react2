@@ -1,5 +1,7 @@
 # React + Vite
 
+## Vercel: https://kdt02-react2-ecru.vercel.app/
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:
