@@ -8,6 +8,8 @@ body {
   min-height: 100vh;
 }
 
+ul, ol, li {list-style: none;}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
