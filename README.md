@@ -1,6 +1,7 @@
 # React + Vite
 
 ## Vercel: https://kdt02-react2-ecru.vercel.app/
+(bgy@pusan.ac.kr, ~!1234)
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
